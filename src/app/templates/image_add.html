@@ -1,0 +1,71 @@
+{% if messages %}
+<ul class="messages">
+	{% for message in messages %}
+	<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+	{% endfor %}
+</ul>
+{% endif %}
+
+<div class="reply"></div>
+
+
+<h1>Create new Post</h1>
+
+
+<form id="blog_create" method='POST' action='.'>{% csrf_token %}
+	{{ form.as_p }}
+
+	<input id="formSubmit" type='submit' value='Create' >
+</form>
+
+<div class="post_list"></div>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+	$('#formSubmit').click(function(e){
+		e.preventDefault();
+		// console.log('test');
+		var url = "{% url 'app:image' %}";
+		var data = $('#blog_create').serialize();
+		fromSubmit(url, data);
+	});
+
+	var fromSubmit= function(url, data){
+		// console.info('fromSubmit');
+		// console.info(data);
+
+		$.ajax({
+			type : "POST",
+			url : url,
+			dataType : "json",
+			data : data,
+			// cache : false,
+			success : function(data) {
+				// console.info('response.data');
+				// console.info(data);
+				$('.reply').html(data.msg);
+				if (data.data){				
+					var postList = JSON.parse(data.data);
+					var postListLi = '<ul>';
+					postList.forEach(function(entry) {
+					    // console.log(entry);
+					    // console.info(entry.fields.title);
+					    postListLi +='<li>'+entry.fields.title+'</li>';
+					});
+
+					postListLi +='</ul>';
+
+					// console.info(postListLi);
+					$('.post_list').html(postListLi);
+					$('#blog_create')[0].reset();
+					}
+
+			},
+			error : function(XMLHttpRequest, textStatus, errorThrown) {
+				// console.log(XMLHttpRequest.responseText);
+			}
+		});
+  }// END OF fromSubmit= function(){
+//||_____________________________________________________________________________________||
+//||__<END>_______________________FOR___REST___OF____ATRIBUTE___________________________//
+</script>
